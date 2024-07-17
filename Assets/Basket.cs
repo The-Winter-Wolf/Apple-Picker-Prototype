@@ -20,6 +20,11 @@ public class Basket : MonoBehaviour
 
     void Update()
     {
+        if (AppleTree.gameIsPaused)
+        {
+            return;           
+        }
+
         // Получить текущие координаты указтеля мыши на экране из Input
         Vector3 mousePos2D = Input.mousePosition;
 

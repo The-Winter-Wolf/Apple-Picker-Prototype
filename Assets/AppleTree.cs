@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class AppleTree : MonoBehaviour
 {
@@ -18,12 +19,23 @@ public class AppleTree : MonoBehaviour
     // Сложность игры
     public int              difficulty = 1;
 
-    static public int       dif = 1;
+    public static int       dif = 1;
 
-    private Vector2          camMax;
+    public static bool      gameIsPaused = false;
+
+    private Vector2         camMax;
+
+    private Text            pauseGT;
 
     void Awake() // Вызывается при создании экземпляра класса, т.е перед Start
     {
+        // Получить ссылку на игровой объект Pause
+        GameObject pauseGO = GameObject.Find("Pause");
+        // Получить компонент Text этого игрового объекта
+        pauseGT = pauseGO.GetComponent<Text>();
+        // Установить начальное число очков равным 0
+        pauseGT.enabled = false;   
+
         // Вычислить расстояние перемещения дерева от ширины камеры (для разных экранов устройств)
         Vector2 camMax = Camera.main.ViewportToWorldPoint(new Vector2 (1,1));
         leftAndRightEdge = camMax.x - 3;
@@ -53,8 +65,40 @@ public class AppleTree : MonoBehaviour
         Invoke("DropApple", secondsBetweenAppleDrops);
     }
 
+    void PauseGame()
+    {
+        if (gameIsPaused)
+        {
+            Time.timeScale = 0f;
+            pauseGT.enabled = true; 
+        }
+        else
+        {
+            Time.timeScale = 1f;
+            pauseGT.enabled = false; 
+        }
+    }
+
     void Update() // Обновляется каждый кадр (частота зависит от быстродействия компьютера)
     {
+        // Выйти из приложения
+        if (Input.GetKey("escape"))
+        {
+            Application.Quit();
+        }
+
+        // Пауза игры
+        if (Input.GetKeyUp("space"))
+        {
+            gameIsPaused = !gameIsPaused;
+            PauseGame();
+        }
+
+        if (gameIsPaused)
+        {
+            return;
+        }
+
         // Простое перемещение
         Vector3 pos = transform.position;
         pos.x += speed * Time.deltaTime;
@@ -79,6 +123,7 @@ public class AppleTree : MonoBehaviour
             }
             difficulty = dif;
         }
+
     }
 
     void FixedUpdate() // Обновляется с фиксированной периодичностью 50 кадров/сек (для движущихся физических объектов)
